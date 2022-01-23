@@ -52,31 +52,10 @@ def train_fn(loader, model, optimizer, loss_fn, scaler):  # only one epoch # the
         # backward
         optimizer.zero_grad()
         scaler.scale(loss).backward()
-        '''
-        Calling .backward() mutiple times accumulates the gradient (by addition) for each parameter. This is why you should call optimizer.zero_grad() after each .step() call.
-        '''
+
         scaler.step(optimizer)
         scaler.update()
-        '''
-        -> optimizer.step() performs a parameter update based on the current gradient (stored in .grad attribute of a parameter) 
         
-        -> When you call loss.backward(), all it does is compute gradient of loss w.r.t all the parameters in loss that have requires_grad = True and store them in parameter.grad attribute for every parameter.
-        optimizer.step() updates all the parameters based on parameter.grad
-        
-        -> The optimizer takes the parameters we want to update, the learning rate we want to use (and possibly many other parameters as well, and performs the updates through its step() method
-        '''
-        '''
-        =============================================================================================
-        Recall that when initializing optimizer you explicitly tell it what parameters (tensors) of the model it should be updating. The gradients are "stored" by the tensors themselves (they have a grad and a requires_grad attributes) once you call backward() on the loss. After computing the gradients for all tensors in the model, calling optimizer.step() makes the optimizer iterate over all parameters (tensors) it is supposed to update and use their internally stored grad to update their values.
-        '''
-        '''
-        important nouns:
-        gradient: 
-        An error gradient is the direction and magnitude calculated during the training of a neural network that is used to update the network weights in the right direction and by the right amount. 
-        To calculate the gradient of a straight line we choose two points on the line itself. The difference in height (y co-ordinates) ÷ The difference in width (x co-ordinates). If the answer is a positive value then the line is uphill in direction. If the answer is a negative value then the line is downhill in direction.
-        optimizer (Adam, SGD, RMSProp, ...):
-        An optimizer is a method or algorithm to update the various parameters that can reduce the loss in much less effort.
-        '''
         # update tqdm loop
         loop.set_postfix(loss=loss.item())
 
